@@ -6,6 +6,7 @@ import { rateLimitGlobal } from "./middlewares/rateLimit";
 import { errorHandler } from "./middlewares/errorHandler";
 import { notFound } from "./middlewares/notFound";
 import authRoutes from "./modules/auth/auth.routes";
+import usersRoutes from "./modules/users/users.routes";
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.get("/api/v1/health", (req, res) => {
 });
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/users", usersRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
