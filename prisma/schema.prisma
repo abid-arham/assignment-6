@@ -1,0 +1,247 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") 
+}
+
+// ───────── Enums ─────────
+
+enum Role {
+  STUDENT
+  INSTRUCTOR
+  ADMIN
+}
+
+enum EnrollmentStatus {
+  ENROLLED
+  DROPPED
+  COMPLETED // set when a grade is submitted
+}
+
+enum InvoiceStatus {
+  UNPAID
+  PAID
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
+// ───────── Identity ─────────
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String? // null for Google-only accounts
+  googleId     String?   @unique
+  role         Role      @default(STUDENT)
+  studentCode  String?   @unique // roll number, students only
+  departmentId String?
+  isActive     Boolean   @default(true)
+  deletedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  department    Department?    @relation(fields: [departmentId], references: [id])
+  sections      Section[] // sections taught (INSTRUCTOR)
+  enrollments   Enrollment[] // STUDENT
+  invoices      Invoice[] // STUDENT
+  refreshTokens RefreshToken[]
+  auditLogs     AuditLog[]
+
+  @@index([role])
+  @@index([departmentId])
+  @@index([deletedAt])
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique // store a hash, never the raw token
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ───────── Academic structure ─────────
+
+model Department {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  code      String    @unique // e.g. CSE
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  courses Course[]
+  users   User[]
+}
+
+model Course {
+  id           String    @id @default(cuid())
+  code         String    @unique // e.g. CSE2101
+  title        String
+  description  String?
+  credits      Int
+  departmentId String
+  deletedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  department      Department           @relation(fields: [departmentId], references: [id])
+  prerequisites   CoursePrerequisite[] @relation("CourseRequires")
+  requiredBy      CoursePrerequisite[] @relation("CourseIsRequired")
+  sections        Section[]
+
+  @@index([departmentId])
+  @@index([deletedAt])
+  @@index([title])
+}
+
+// Reject self-reference and cycles in the service layer.
+model CoursePrerequisite {
+  courseId       String
+  prerequisiteId String
+
+  course       Course @relation("CourseRequires", fields: [courseId], references: [id], onDelete: Cascade)
+  prerequisite Course @relation("CourseIsRequired", fields: [prerequisiteId], references: [id], onDelete: Cascade)
+
+  @@id([courseId, prerequisiteId])
+  @@index([prerequisiteId])
+}
+
+model Semester {
+  id               String   @id @default(cuid())
+  name             String   @unique // "Fall 2026"
+  startDate        DateTime
+  endDate          DateTime
+  enrollmentOpen   Boolean  @default(false)
+  tuitionPerCredit Decimal  @db.Decimal(10, 2)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  sections Section[]
+  invoices Invoice[]
+}
+
+model Section {
+  id            String    @id @default(cuid())
+  courseId      String
+  semesterId    String
+  instructorId  String
+  sectionCode   String // "A", "B"
+  capacity      Int
+  enrolledCount Int       @default(0)
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  course      Course       @relation(fields: [courseId], references: [id])
+  semester    Semester     @relation(fields: [semesterId], references: [id])
+  instructor  User         @relation(fields: [instructorId], references: [id])
+  enrollments Enrollment[]
+
+  @@unique([courseId, semesterId, sectionCode])
+  @@index([semesterId])
+  @@index([instructorId])
+  @@index([courseId])
+}
+
+// ───────── Enrollment & grades ─────────
+
+// Re-enrolling after a drop: reactivate this row (status back to ENROLLED),
+// do NOT insert a second one — the unique constraint will reject it.
+model Enrollment {
+  id         String           @id @default(cuid())
+  studentId  String
+  sectionId  String
+  status     EnrollmentStatus @default(ENROLLED)
+  grade      String? // "A+", "B", "F" ... validated by Zod enum
+  gradePoint Decimal?         @db.Decimal(3, 2) // mapped from grade server-side
+  enrolledAt DateTime         @default(now())
+  droppedAt  DateTime?
+  deletedAt  DateTime?
+  updatedAt  DateTime         @updatedAt
+
+  student User    @relation(fields: [studentId], references: [id])
+  section Section @relation(fields: [sectionId], references: [id])
+
+  @@unique([studentId, sectionId])
+  @@index([sectionId])
+  @@index([studentId, status])
+}
+
+// ───────── Fees & payments ─────────
+
+model Invoice {
+  id           String        @id @default(cuid())
+  studentId    String
+  semesterId   String
+  totalCredits Int
+  amount       Decimal       @db.Decimal(10, 2) // totalCredits * tuitionPerCredit
+  status       InvoiceStatus @default(UNPAID)
+  paidAt       DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  student  User      @relation(fields: [studentId], references: [id])
+  semester Semester  @relation(fields: [semesterId], references: [id])
+  payments Payment[]
+
+  @@unique([studentId, semesterId])
+  @@index([status])
+}
+
+// stripeEventId dedupes webhook deliveries — Stripe retries on timeout/non-2xx,
+// so the same event.id can arrive more than once. Check-then-skip on it
+// before mutating status, inside the same transaction as the Invoice update.
+model Payment {
+  id                String        @id @default(cuid())
+  invoiceId         String
+  provider          String        @default("STRIPE")
+  providerSessionId String?       @unique // Checkout Session id (or SSLCommerz tran_id)
+  providerPaymentId String?
+  stripeEventId     String?       @unique // last webhook event.id applied to this row
+  amount            Decimal       @db.Decimal(10, 2)
+  currency          String        @default("usd")
+  status            PaymentStatus @default(PENDING)
+  failureReason     String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+
+  @@index([invoiceId])
+  @@index([status])
+}
+
+// ───────── Audit ─────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  action    String // "ENROLLMENT_CREATED", "GRADE_SUBMITTED", "ROLE_CHANGED", "PAYMENT_SUCCEEDED"
+  entity    String // "Enrollment", "User", "Payment"
+  entityId  String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  actor User? @relation(fields: [actorId], references: [id])
+
+  @@index([entity, entityId])
+  @@index([actorId])
+  @@index([createdAt])
+}
