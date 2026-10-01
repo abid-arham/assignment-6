@@ -4,31 +4,31 @@ import { AppError } from "../../utils/AppError";
 import { hashPassword, comparePassword, hashToken } from "../../utils/hash";
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../../utils/jwt";
 
-export async function registerUser(input: { name: string; email: string; password: string }) {
-  const existing = await prisma.user.findUnique({ where: { email: input.email } });
+ const registerUser = async( name: string, email: string, password: string )=> {
+  const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) throw new AppError(409, "An account with this email already exists");
 
-  const passwordHash = await hashPassword(input.password);
+  const passwordHash = await hashPassword(password);
 
   const user = await prisma.user.create({
-    data: { name: input.name, email: input.email, passwordHash, role: "STUDENT" },
+    data: { name: name, email: email, passwordHash, role: "STUDENT" },
   });
 
   return issueTokenPair(user.id, user.role);
 }
 
-export async function loginUser(input: { email: string; password: string }) {
-  const user = await prisma.user.findFirst({ where: { email: input.email, deletedAt: null } });
+ const loginUser = async( email: string, password: string)=> {
+  const user = await prisma.user.findFirst({ where: { email, deletedAt: null } });
 
   if (!user || !user.passwordHash) throw new AppError(401, "Invalid email or password");
 
-  const valid = await comparePassword(input.password, user.passwordHash);
+  const valid = await comparePassword(password, user.passwordHash);
   if (!valid) throw new AppError(401, "Invalid email or password");
 
   return issueTokenPair(user.id, user.role);
 }
 
-export async function refreshAccessToken(refreshToken: string) {
+ const refreshAccessToken = async(refreshToken: string)=> {
   let payload: { id: string };
   try {
     payload = verifyRefreshToken(refreshToken);
@@ -51,7 +51,7 @@ export async function refreshAccessToken(refreshToken: string) {
   return issueTokenPair(user.id, user.role);
 }
 
-export async function logoutUser(refreshToken: string) {
+ const logoutUser = async(refreshToken: string)=> {
   const tokenHash = hashToken(refreshToken);
   await prisma.refreshToken.updateMany({
     where: { tokenHash, revokedAt: null },
@@ -59,7 +59,7 @@ export async function logoutUser(refreshToken: string) {
   });
 }
 
-async function issueTokenPair(userId: string, role: Role) {
+const issueTokenPair = async(userId: string, role: Role)=>{
   const accessToken = signAccessToken({ id: userId, role });
   const refreshToken = signRefreshToken({ id: userId });
 
@@ -72,4 +72,13 @@ async function issueTokenPair(userId: string, role: Role) {
   });
 
   return { accessToken, refreshToken };
+}
+
+
+export const AuthService = {
+  registerUser,
+  loginUser,
+  logoutUser,
+  refreshAccessToken
+  
 }
