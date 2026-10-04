@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { Ratelimit } from "@upstash/ratelimit";
-import { redis } from "../config/redis";
-import { AppError } from "../utils/AppError";
+import { redis } from "../config/redis.js";
+import { AppError } from "../utils/AppError.js";
 
 function buildLimiter(requests: number, window: `${number} ${"s" | "m"}`) {
   if (!redis) return null;

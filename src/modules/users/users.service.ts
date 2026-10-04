@@ -1,5 +1,5 @@
-import { prisma } from "../../config/prisma";
-import { toSafeUser } from "../../utils/serialize";
+import { prisma } from "../../config/prisma.js";
+import { toSafeUser } from "../../utils/serialize.js";
 
 export async function getMe(userId: string) {
   const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });

@@ -1,4 +1,4 @@
-import { redis } from "../config/redis";
+import { redis } from "../config/redis.js";
 
 export async function getOrSetCache<T>(
   key: string,

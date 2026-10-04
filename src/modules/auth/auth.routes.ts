@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { validate } from "../../middlewares/validate";
-import { rateLimitAuth } from "../../middlewares/rateLimit";
-import { registerSchema, loginSchema, refreshTokenSchema } from "./auth.schema";
-import { register, login, refresh, logout } from "./auth.controller";
+import { validate } from "../../middlewares/validate.js";
+import { rateLimitAuth } from "../../middlewares/rateLimit.js";
+import { registerSchema, loginSchema, refreshTokenSchema } from "./auth.schema.js";
+import { register, login, refresh, logout } from "./auth.controller.js";
 
 const router = Router();
 

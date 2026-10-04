@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { Prisma } from "@prisma/client";
 import { ZodError } from "zod";
-import { AppError } from "../utils/AppError";
-import { sendError } from "../utils/sendResponse";
+import { AppError } from "../utils/AppError.js";
+import { sendError } from "../utils/sendResponse.js";
 
 export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction) {
   console.error(err);

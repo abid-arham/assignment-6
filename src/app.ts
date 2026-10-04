@@ -30,7 +30,7 @@ app.use(express.json());
 app.use(rateLimitGlobal);
 
 
-app.get("/api/v1/", async(req:Request, res:Response)=>{
+app.get("/", async(req:Request, res:Response)=>{
     
     res.send("Hello World")
 })

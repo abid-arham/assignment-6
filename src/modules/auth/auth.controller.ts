@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { asyncHandler } from "../../utils/asyncHandler";
-import { sendSuccess } from "../../utils/sendResponse";
-import { registerUser, loginUser, refreshAccessToken, logoutUser } from "./auth.service";
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import { sendSuccess } from "../../utils/sendResponse.js";
+import { registerUser, loginUser, refreshAccessToken, logoutUser } from "./auth.service.js";
 
 export const register = asyncHandler(async (req: Request, res: Response) => {
   const tokens = await registerUser(req.body);

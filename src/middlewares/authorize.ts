@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { Role } from "@prisma/client";
-import { AppError } from "../utils/AppError";
+import { AppError } from "../utils/AppError.js";
 
 export function authorize(...roles: Role[]) {
   return (req: Request, res: Response, next: NextFunction) => {
