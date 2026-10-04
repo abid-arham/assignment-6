@@ -10,7 +10,7 @@ const getAllSections = asyncHandler(async (req: Request, res: Response) => {
 })
 
 const getSectionById = asyncHandler(async (req: Request, res: Response) => {
-  const result = await sectionServices.getSectionById(req.params.id)
+  const result = await sectionServices.getSectionById(req.params.id as string)
   sendSuccess(res, httpStatus.OK, "Section retrieved successfully", result)
 })
 
@@ -20,7 +20,7 @@ const createSection = asyncHandler(async (req: Request, res: Response) => {
 })
 
 const updateSection = asyncHandler(async (req: Request, res: Response) => {
-  const result = await sectionServices.updateSection(req.params.id, req.body)
+  const result = await sectionServices.updateSection(req.params.id as string, req.body)
   sendSuccess(res, httpStatus.OK, "Section updated successfully", result)
 })
 

@@ -15,7 +15,7 @@ const submitGrade = async (enrollmentId: string, instructorId: string, grade: st
 
   return prisma.enrollment.update({
     where: { id: enrollmentId },
-    data: { grade, gradePoint: GRADE_POINTS[grade], status: "COMPLETED" },
+    data: { grade, gradePoint: GRADE_POINTS[grade]!, status: "COMPLETED" },
   })
 }
 
