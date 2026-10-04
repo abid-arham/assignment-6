@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import { env } from "./config/env.js";
@@ -28,6 +28,12 @@ app.post("/api/v1/payments/webhook", express.raw({ type: "application/json" }), 
 
 app.use(express.json());
 app.use(rateLimitGlobal);
+
+
+app.get("/", async(req:Request, res:Response)=>{
+    
+    res.send("Hello World")
+})
 
 app.get("/api/v1/health", (req, res) => {
   res.json({ success: true, message: "OK", data: { uptime: process.uptime() } });
