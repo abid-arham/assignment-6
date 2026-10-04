@@ -1,3 +1,4 @@
+
 import { prisma } from "../../config/prisma.js"
 import { AppError } from "../../utils/AppError.js"
 import { GRADE_POINTS } from "./gradePoints.js"
