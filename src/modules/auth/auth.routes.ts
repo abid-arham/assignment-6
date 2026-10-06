@@ -6,8 +6,8 @@ import { register, login, refresh, logout } from "./auth.controller.js";
 
 const router = Router();
 
-router.post("/register", rateLimitAuth, validate(registerSchema), register);
-router.post("/login", rateLimitAuth, validate(loginSchema), login);
+router.post("/register", validate(registerSchema), register);
+router.post("/login", validate(loginSchema), login);
 router.post("/refresh-token", validate(refreshTokenSchema), refresh);
 router.post("/logout", validate(refreshTokenSchema), logout);
 
