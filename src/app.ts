@@ -19,6 +19,9 @@ import { handleStripeWebhook } from "./modules/payments/payment.webhook.js";
 
 const app = express();
 
+// ponytail: Vercel's Express builder type-checks ESM files against helmet's CJS typings (it drops
+// the import mode), where helmet() looks uncallable. Runtime is fine; remove once Vercel fixes it.
+// @ts-ignore
 app.use(helmet());
 app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 
