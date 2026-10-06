@@ -1,6 +1,7 @@
 
 import { prisma } from "../../config/prisma.js"
 import { AppError } from "../../utils/AppError.js"
+import { writeAuditLog } from "../../utils/audit.js"
 import { GRADE_POINTS } from "./gradePoints.js"
 
 const submitGrade = async (enrollmentId: string, instructorId: string, grade: string) => {
@@ -13,9 +14,21 @@ const submitGrade = async (enrollmentId: string, instructorId: string, grade: st
     throw new AppError(403, "You do not teach this section")
   }
 
-  return prisma.enrollment.update({
-    where: { id: enrollmentId },
-    data: { grade, gradePoint: GRADE_POINTS[grade]!, status: "COMPLETED" },
+  return prisma.$transaction(async (tx) => {
+    const graded = await tx.enrollment.update({
+      where: { id: enrollmentId },
+      data: { grade, gradePoint: GRADE_POINTS[grade]!, status: "COMPLETED" },
+    })
+
+    await writeAuditLog({
+      actorId: instructorId,
+      action: "GRADE_SUBMITTED",
+      entity: "Enrollment",
+      entityId: enrollmentId,
+      metadata: { grade },
+    }, tx)
+
+    return graded
   })
 }
 

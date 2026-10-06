@@ -69,7 +69,7 @@ const handleCheckoutCompleted = async (event: Stripe.Event) => {
       entity: "Payment",
       entityId: payment.id,
       metadata: { stripeEventId: event.id, invoiceId: payment.invoiceId },
-    })
+    }, tx)
   })
 }
 

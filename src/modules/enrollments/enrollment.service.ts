@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client"
 import { prisma } from "../../config/prisma.js"
 import { AppError } from "../../utils/AppError.js"
+import { writeAuditLog } from "../../utils/audit.js"
 
 const enroll = async (studentId: string, sectionId: string) => {
   return prisma.$transaction(async (tx) => {
@@ -38,21 +39,27 @@ const enroll = async (studentId: string, sectionId: string) => {
       WHERE id = ${sectionId} AND "enrolledCount" < capacity`
     if (updated === 0) throw new AppError(409, "Section is full")
 
-    if (existing) {
-      return tx.enrollment.update({
-        where: { id: existing.id },
-        data: { status: "ENROLLED", droppedAt: null, enrolledAt: new Date() },
-      })
-    }
+    const enrollment = existing
+      ? await tx.enrollment.update({
+          where: { id: existing.id },
+          data: { status: "ENROLLED", droppedAt: null, enrolledAt: new Date() },
+        })
+      : await tx.enrollment.create({ data: { studentId, sectionId } }).catch((e) => {
+          if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+            throw new AppError(409, "Already enrolled in this section")
+          }
+          throw e
+        })
 
-    try {
-      return await tx.enrollment.create({ data: { studentId, sectionId } })
-    } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
-        throw new AppError(409, "Already enrolled in this section")
-      }
-      throw e
-    }
+    await writeAuditLog({
+      actorId: studentId,
+      action: "ENROLLMENT_CREATED",
+      entity: "Enrollment",
+      entityId: enrollment.id,
+      metadata: { sectionId, reactivated: Boolean(existing) },
+    }, tx)
+
+    return enrollment
   })
 }
 
@@ -67,10 +74,20 @@ const drop = async (studentId: string, enrollmentId: string) => {
       UPDATE "Section" SET "enrolledCount" = "enrolledCount" - 1
       WHERE id = ${enrollment.sectionId} AND "enrolledCount" > 0`
 
-    return tx.enrollment.update({
+    const dropped = await tx.enrollment.update({
       where: { id: enrollmentId },
       data: { status: "DROPPED", droppedAt: new Date() },
     })
+
+    await writeAuditLog({
+      actorId: studentId,
+      action: "ENROLLMENT_DROPPED",
+      entity: "Enrollment",
+      entityId: enrollmentId,
+      metadata: { sectionId: enrollment.sectionId },
+    }, tx)
+
+    return dropped
   })
 }
 
