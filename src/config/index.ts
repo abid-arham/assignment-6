@@ -1,8 +1,10 @@
-import { z } from "zod";
 import dotenv from "dotenv";
+import path from "path";
+import { z } from "zod";
 
-dotenv.config();
+dotenv.config({ path: path.join(process.cwd(), ".env") });
 
+// Fail at boot on a missing/invalid required var, not at the first request that needs it.
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   PORT: z.coerce.number().default(3000),
@@ -10,8 +12,6 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
   JWT_ACCESS_SECRET: z.string().min(16, "JWT_ACCESS_SECRET must be at least 16 chars"),
   JWT_REFRESH_SECRET: z.string().min(16, "JWT_REFRESH_SECRET must be at least 16 chars"),
-
-  DIRECT_URL: z.string().optional(),
 
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
@@ -27,11 +27,11 @@ const parsed = envSchema.safeParse(process.env);
 
 if (!parsed.success) {
   console.error("Invalid environment variables:");
-  console.error(parsed.error.flatten().fieldErrors);
+  console.error(z.flattenError(parsed.error).fieldErrors);
   process.exit(1);
 }
 
-export const env = parsed.data;
+const env = parsed.data;
 
 if (!env.UPSTASH_REDIS_REST_URL || !env.UPSTASH_REDIS_REST_TOKEN) {
   console.warn("Upstash Redis not configured — caching and rate limiting are disabled.");
@@ -42,3 +42,19 @@ if (!env.STRIPE_SECRET_KEY) {
 if (!env.GOOGLE_CLIENT_ID) {
   console.warn("Google OAuth not configured — /auth/google routes will fail until configured.");
 }
+
+export default {
+  node_env: env.NODE_ENV,
+  port: env.PORT,
+  database_url: env.DATABASE_URL,
+  jwt_access_secret: env.JWT_ACCESS_SECRET,
+  jwt_refresh_secret: env.JWT_REFRESH_SECRET,
+  google_client_id: env.GOOGLE_CLIENT_ID,
+  google_client_secret: env.GOOGLE_CLIENT_SECRET,
+  google_redirect_uri: env.GOOGLE_REDIRECT_URI,
+  stripe_secret_key: env.STRIPE_SECRET_KEY,
+  stripe_webhook_secret: env.STRIPE_WEBHOOK_SECRET,
+  upstash_redis_rest_url: env.UPSTASH_REDIS_REST_URL,
+  upstash_redis_rest_token: env.UPSTASH_REDIS_REST_TOKEN,
+  cors_origin: env.CORS_ORIGIN,
+};

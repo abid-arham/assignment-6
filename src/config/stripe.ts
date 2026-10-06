@@ -1,6 +1,6 @@
 import Stripe from "stripe"
-import { env } from "./env.js"
+import config from "./index.js"
 
-export const stripe = env.STRIPE_SECRET_KEY
-  ? new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: "2026-08-26.dahlia" })
+export const stripe = config.stripe_secret_key
+  ? new Stripe(config.stripe_secret_key, { apiVersion: "2026-08-26.dahlia" })
   : null

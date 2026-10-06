@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import helmet from "helmet";
-import { env } from "./config/env.js";
+import config from "./config/index.js";
 import { rateLimitGlobal } from "./middlewares/rateLimit.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import { notFound } from "./middlewares/notFound.js";
@@ -23,7 +23,7 @@ const app = express();
 // the import mode), where helmet() looks uncallable. Runtime is fine; remove once Vercel fixes it.
 // @ts-ignore
 app.use(helmet());
-app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
+app.use(cors({ origin: config.cors_origin, credentials: true }));
 
 // Must be mounted BEFORE express.json() — Stripe's signature check needs the
 // raw, unparsed body on this exact path only.
