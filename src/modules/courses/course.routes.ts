@@ -8,7 +8,7 @@ import { courseController } from "./course.controller.js"
 
 const router = Router()
 
-router.get("/", validate(courseValidation.list), courseController.getAllCourses)
+router.get("/", validate(courseValidation.list, "query"), courseController.getAllCourses)
 router.get("/:id", courseController.getCourseById)
 router.post("/", authenticate, authorize(Role.ADMIN), validate(courseValidation.create), courseController.createCourse)
 router.patch("/:id", authenticate, authorize(Role.ADMIN), validate(courseValidation.update), courseController.updateCourse)

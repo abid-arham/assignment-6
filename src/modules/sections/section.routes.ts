@@ -9,7 +9,7 @@ import { sectionController } from "./section.controller.js"
 
 const router = Router()
 
-router.get("/", validate(sectionValidation.list), sectionController.getAllSections)
+router.get("/", validate(sectionValidation.list, "query"), sectionController.getAllSections)
 router.get("/my", authenticate, authorize(Role.INSTRUCTOR), sectionController.getMySections)
 router.get("/:id", sectionController.getSectionById)
 router.get("/:id/students", authenticate, authorize(Role.INSTRUCTOR), enrollmentController.getStudentsForSection)
