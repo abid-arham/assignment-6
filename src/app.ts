@@ -16,6 +16,7 @@ import { studentRouter } from "./modules/students/student.routes.js";
 import { invoiceRouter } from "./modules/invoices/invoice.routes.js";
 import { paymentRouter } from "./modules/payments/payment.routes.js";
 import { handleStripeWebhook } from "./modules/payments/payment.webhook.js";
+import { adminRouter } from "./modules/admin/admin.routes.js";
 
 const app = express();
 
@@ -52,6 +53,7 @@ app.use("/api/v1/enrollments", enrollmentRouter);
 app.use("/api/v1/students", studentRouter);
 app.use("/api/v1/invoices", invoiceRouter);
 app.use("/api/v1/payments", paymentRouter);
+app.use("/api/v1/admin", adminRouter);
 
 app.use(notFound);
 app.use(errorHandler);

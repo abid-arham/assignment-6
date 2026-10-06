@@ -25,6 +25,7 @@ export const loginUser = async (input: { email: string; password: string }) => {
 
   const valid = await comparePassword(input.password, user.passwordHash)
   if (!valid) throw new AppError(401, "Invalid email or password")
+  if (!user.isActive) throw new AppError(403, "This account has been deactivated")
 
   return issueTokenPair(user.id, user.role)
 }
@@ -44,7 +45,7 @@ export const refreshAccessToken = async (refreshToken: string) => {
   }
 
   const user = await prisma.user.findUnique({ where: { id: payload.id } })
-  if (!user) throw new AppError(401, "User no longer exists")
+  if (!user || user.deletedAt || !user.isActive) throw new AppError(401, "User no longer exists or is deactivated")
 
   await prisma.refreshToken.update({ where: { id: stored.id }, data: { revokedAt: new Date() } })
 
