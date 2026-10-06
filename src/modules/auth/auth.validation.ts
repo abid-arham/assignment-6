@@ -21,4 +21,10 @@ const refreshToken = z.object({
   }),
 });
 
-export const authValidation = { register, login, refreshToken };
+const googleCallback = z.object({
+  query: z.object({
+    code: z.string().min(1),
+  }),
+});
+
+export const authValidation = { register, login, refreshToken, googleCallback };

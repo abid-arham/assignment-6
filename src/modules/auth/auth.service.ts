@@ -1,4 +1,6 @@
 import { Role } from "@prisma/client"
+import { OAuth2Client } from "google-auth-library"
+import config from "../../config/index.js"
 import { prisma } from "../../config/prisma.js"
 import { AppError } from "../../utils/AppError.js"
 import { hashPassword, comparePassword, hashToken } from "../../utils/hash.js"
@@ -45,6 +47,46 @@ export const refreshAccessToken = async (refreshToken: string) => {
   if (!user) throw new AppError(401, "User no longer exists")
 
   await prisma.refreshToken.update({ where: { id: stored.id }, data: { revokedAt: new Date() } })
+
+  return issueTokenPair(user.id, user.role)
+}
+
+const googleClient = new OAuth2Client(config.google_client_id, config.google_client_secret, config.google_redirect_uri)
+
+export const getGoogleAuthUrl = () => {
+  if (!config.google_client_id) throw new AppError(500, "Google login is not configured")
+  return googleClient.generateAuthUrl({ scope: ["openid", "email", "profile"], prompt: "select_account" })
+}
+
+export const loginWithGoogle = async (code: string) => {
+  if (!config.google_client_id) throw new AppError(500, "Google login is not configured")
+
+  let idToken: string | null | undefined
+  try {
+    idToken = (await googleClient.getToken(code)).tokens.id_token
+  } catch {
+    throw new AppError(401, "Invalid or expired Google authorization code")
+  }
+  if (!idToken) throw new AppError(401, "Google did not return an ID token")
+
+  const ticket = await googleClient.verifyIdToken({ idToken, audience: config.google_client_id })
+  const profile = ticket.getPayload()
+  if (!profile?.email || !profile.email_verified) {
+    throw new AppError(401, "Google account email is not verified")
+  }
+
+  let user =
+    (await prisma.user.findUnique({ where: { googleId: profile.sub } })) ??
+    (await prisma.user.findUnique({ where: { email: profile.email } }))
+  if (user && (user.deletedAt || !user.isActive)) throw new AppError(403, "This account has been deactivated")
+
+  if (!user) {
+    user = await prisma.user.create({
+      data: { name: profile.name ?? profile.email, email: profile.email, googleId: profile.sub },
+    })
+  } else if (!user.googleId) {
+    user = await prisma.user.update({ where: { id: user.id }, data: { googleId: profile.sub } })
+  }
 
   return issueTokenPair(user.id, user.role)
 }

@@ -1,7 +1,14 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { sendSuccess } from "../../utils/sendResponse.js";
-import { registerUser, loginUser, refreshAccessToken, logoutUser } from "./auth.service.js";
+import {
+  registerUser,
+  loginUser,
+  refreshAccessToken,
+  logoutUser,
+  getGoogleAuthUrl,
+  loginWithGoogle,
+} from "./auth.service.js";
 
 export const register = asyncHandler(async (req: Request, res: Response) => {
   const tokens = await registerUser(req.body);
@@ -21,4 +28,13 @@ export const refresh = asyncHandler(async (req: Request, res: Response) => {
 export const logout = asyncHandler(async (req: Request, res: Response) => {
   await logoutUser(req.body.refreshToken);
   sendSuccess(res, 200, "Logged out successfully", null);
+});
+
+export const googleLogin = asyncHandler(async (req: Request, res: Response) => {
+  res.redirect(getGoogleAuthUrl());
+});
+
+export const googleCallback = asyncHandler(async (req: Request, res: Response) => {
+  const tokens = await loginWithGoogle(req.query.code as string);
+  sendSuccess(res, 200, "Logged in with Google successfully", tokens);
 });
