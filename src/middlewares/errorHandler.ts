@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { Prisma } from "@prisma/client";
+import multer from "multer";
 import { ZodError } from "zod";
 import { AppError } from "../utils/AppError.js";
 import { sendError } from "../utils/sendResponse.js";
@@ -13,6 +14,10 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
 
   if (err instanceof ZodError) {
     return sendError(res, 422, "Validation failed", err.issues);
+  }
+
+  if (err instanceof multer.MulterError) {
+    return sendError(res, 422, err.message, [{ field: err.field, code: err.code }]);
   }
 
   // express.json() rejects an unparseable body with a SyntaxError carrying the raw body.

@@ -45,6 +45,7 @@ model User {
   googleId     String?   @unique
   role         Role      @default(STUDENT)
   studentCode  String?   @unique // roll number, students only
+  avatarUrl    String? // Cloudinary secure_url
   departmentId String?
   isActive     Boolean   @default(true)
   deletedAt    DateTime?

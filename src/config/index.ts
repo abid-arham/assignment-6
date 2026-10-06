@@ -20,6 +20,9 @@ const envSchema = z.object({
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   UPSTASH_REDIS_REST_URL: z.string().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+  CLOUDINARY_CLOUD_NAME: z.string().optional(),
+  CLOUDINARY_API_KEY: z.string().optional(),
+  CLOUDINARY_API_SECRET: z.string().optional(),
   CORS_ORIGIN: z.string().default("*"),
 });
 
@@ -42,6 +45,9 @@ if (!env.STRIPE_SECRET_KEY) {
 if (!env.GOOGLE_CLIENT_ID) {
   console.warn("Google OAuth not configured — /auth/google routes will fail until configured.");
 }
+if (!env.CLOUDINARY_CLOUD_NAME || !env.CLOUDINARY_API_KEY || !env.CLOUDINARY_API_SECRET) {
+  console.warn("Cloudinary not configured — avatar uploads will fail until configured.");
+}
 
 export default {
   node_env: env.NODE_ENV,
@@ -56,5 +62,8 @@ export default {
   stripe_webhook_secret: env.STRIPE_WEBHOOK_SECRET,
   upstash_redis_rest_url: env.UPSTASH_REDIS_REST_URL,
   upstash_redis_rest_token: env.UPSTASH_REDIS_REST_TOKEN,
+  cloudinary_cloud_name: env.CLOUDINARY_CLOUD_NAME,
+  cloudinary_api_key: env.CLOUDINARY_API_KEY,
+  cloudinary_api_secret: env.CLOUDINARY_API_SECRET,
   cors_origin: env.CORS_ORIGIN,
 };
