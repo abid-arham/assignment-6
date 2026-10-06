@@ -7,9 +7,10 @@ const enroll = async (studentId: string, sectionId: string) => {
   return prisma.$transaction(async (tx) => {
     const section = await tx.section.findFirst({
       where: { id: sectionId, deletedAt: null },
-      include: { course: { include: { prerequisites: true } } },
+      include: { semester: true, course: { include: { prerequisites: true } } },
     })
     if (!section) throw new AppError(404, "Section not found")
+    if (!section.semester.enrollmentOpen) throw new AppError(422, "Enrollment is closed for this semester")
 
     const existing = await tx.enrollment.findUnique({
       where: { studentId_sectionId: { studentId, sectionId } },

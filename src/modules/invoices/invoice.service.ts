@@ -5,6 +5,11 @@ const generateInvoice = async (studentId: string, semesterId: string) => {
   const semester = await prisma.semester.findUnique({ where: { id: semesterId } })
   if (!semester) throw new AppError(404, "Semester not found")
 
+  const existing = await prisma.invoice.findUnique({
+    where: { studentId_semesterId: { studentId, semesterId } },
+  })
+  if (existing?.status === "PAID") throw new AppError(409, "Invoice for this semester is already paid")
+
   const enrollments = await prisma.enrollment.findMany({
     where: { studentId, status: "ENROLLED", section: { semesterId } },
     include: { section: { include: { course: true } } },
