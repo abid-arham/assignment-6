@@ -53,14 +53,16 @@ export const refreshAccessToken = async (refreshToken: string) => {
 }
 
 const googleClient = new OAuth2Client(config.google_client_id, config.google_client_secret, config.google_redirect_uri)
+// All three are needed: without the redirect URI Google rejects the consent request itself.
+const googleConfigured = Boolean(config.google_client_id && config.google_client_secret && config.google_redirect_uri)
 
 export const getGoogleAuthUrl = () => {
-  if (!config.google_client_id) throw new AppError(500, "Google login is not configured")
+  if (!googleConfigured) throw new AppError(500, "Google login is not configured")
   return googleClient.generateAuthUrl({ scope: ["openid", "email", "profile"], prompt: "select_account" })
 }
 
 export const loginWithGoogle = async (code: string) => {
-  if (!config.google_client_id) throw new AppError(500, "Google login is not configured")
+  if (!googleConfigured) throw new AppError(500, "Google login is not configured")
 
   let idToken: string | null | undefined
   try {

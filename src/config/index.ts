@@ -42,7 +42,7 @@ if (!env.UPSTASH_REDIS_REST_URL || !env.UPSTASH_REDIS_REST_TOKEN) {
 if (!env.STRIPE_SECRET_KEY) {
   console.warn("STRIPE_SECRET_KEY not set — payment routes will fail until configured.");
 }
-if (!env.GOOGLE_CLIENT_ID) {
+if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET || !env.GOOGLE_REDIRECT_URI) {
   console.warn("Google OAuth not configured — /auth/google routes will fail until configured.");
 }
 if (!env.CLOUDINARY_CLOUD_NAME || !env.CLOUDINARY_API_KEY || !env.CLOUDINARY_API_SECRET) {
