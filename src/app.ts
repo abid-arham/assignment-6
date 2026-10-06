@@ -20,6 +20,9 @@ import { adminRouter } from "./modules/admin/admin.routes.js";
 
 const app = express();
 
+// Behind Vercel's proxy: makes req.ip the client (rate limiting) and req.protocol https (payment URLs).
+app.set("trust proxy", 1);
+
 // ponytail: Vercel's Express builder type-checks ESM files against helmet's CJS typings (it drops
 // the import mode), where helmet() looks uncallable. Runtime is fine; remove once Vercel fixes it.
 // @ts-ignore

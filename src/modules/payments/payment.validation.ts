@@ -6,4 +6,16 @@ const initiate = z.object({
   }),
 })
 
-export const paymentValidation = { initiate }
+const success = z.object({
+  query: z.object({
+    session_id: z.string().min(1),
+  }),
+})
+
+const cancel = z.object({
+  query: z.object({
+    payment_id: z.string().min(1),
+  }),
+})
+
+export const paymentValidation = { initiate, success, cancel }

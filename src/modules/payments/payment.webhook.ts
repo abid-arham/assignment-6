@@ -19,7 +19,9 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
   }
 
   if (event.type === "checkout.session.completed") {
-    await paymentServices.handleCheckoutCompleted(event)
+    await paymentServices.markSucceeded(event.data.object, event.id)
+  } else if (event.type === "checkout.session.expired") {
+    await paymentServices.markCancelled(event.data.object.id, "Checkout session expired")
   }
 
   res.status(200).json({ received: true })

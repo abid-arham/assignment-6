@@ -5,8 +5,19 @@ import { sendSuccess } from "../../utils/sendResponse.js"
 import { paymentServices } from "./payment.service.js"
 
 const initiatePayment = asyncHandler(async (req: Request, res: Response) => {
-  const result = await paymentServices.createCheckoutSession(req.user!.id, req.body.invoiceId)
+  const baseUrl = `${req.protocol}://${req.get("host")}`
+  const result = await paymentServices.createCheckoutSession(req.user!.id, req.body.invoiceId, baseUrl)
   sendSuccess(res, httpStatus.OK, "Checkout session created", result)
+})
+
+const paymentSuccess = asyncHandler(async (req: Request, res: Response) => {
+  const result = await paymentServices.confirmSuccess(req.query.session_id as string)
+  sendSuccess(res, httpStatus.OK, `Payment ${result.status.toLowerCase()}`, result)
+})
+
+const paymentCancel = asyncHandler(async (req: Request, res: Response) => {
+  const result = await paymentServices.cancelPayment(req.query.payment_id as string)
+  sendSuccess(res, httpStatus.OK, `Payment ${result.status.toLowerCase()}`, result)
 })
 
 const getPaymentStatus = asyncHandler(async (req: Request, res: Response) => {
@@ -14,4 +25,4 @@ const getPaymentStatus = asyncHandler(async (req: Request, res: Response) => {
   sendSuccess(res, httpStatus.OK, "Payment status retrieved", result)
 })
 
-export const paymentController = { initiatePayment, getPaymentStatus }
+export const paymentController = { initiatePayment, paymentSuccess, paymentCancel, getPaymentStatus }
