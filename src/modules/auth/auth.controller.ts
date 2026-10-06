@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { sendSuccess } from "../../utils/sendResponse.js";
 import {
@@ -30,7 +30,7 @@ export const logout = asyncHandler(async (req: Request, res: Response) => {
   sendSuccess(res, 200, "Logged out successfully", null);
 });
 
-export const googleLogin = asyncHandler(async (req: Request, res: Response) => {
+export const googleLogin = asyncHandler(async (_req: Request, res: Response) => {
   res.redirect(getGoogleAuthUrl());
 });
 

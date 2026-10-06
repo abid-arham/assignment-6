@@ -1,6 +1,6 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import jwt from "jsonwebtoken";
-import { Role } from "@prisma/client";
+import type { Role } from "@prisma/client";
 import config from "../config/index.js";
 
 export interface AccessTokenPayload {

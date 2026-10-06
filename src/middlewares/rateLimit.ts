@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { Ratelimit } from "@upstash/ratelimit";
 import { redis } from "../config/redis.js";
 import { AppError } from "../utils/AppError.js";
@@ -12,7 +12,7 @@ const globalLimiter = buildLimiter(60, "1 m");
 const authLimiter = buildLimiter(5, "1 m");
 
 function makeMiddleware(limiter: Ratelimit | null) {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, _res: Response, next: NextFunction) => {
     if (!limiter) return next();
 
     const identifier = req.user?.id ?? req.ip ?? "anonymous";

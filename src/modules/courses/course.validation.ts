@@ -35,4 +35,6 @@ const addPrerequisite = z.object({
   }),
 })
 
+export type CourseListQuery = z.infer<typeof list>["query"]
+
 export const courseValidation = { create, update, list, addPrerequisite }

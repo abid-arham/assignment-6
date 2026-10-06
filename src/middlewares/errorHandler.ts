@@ -1,11 +1,11 @@
-import { NextFunction, Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { Prisma } from "@prisma/client";
 import multer from "multer";
 import { ZodError } from "zod";
 import { AppError } from "../utils/AppError.js";
 import { sendError } from "../utils/sendResponse.js";
 
-export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction) {
+export function errorHandler(err: unknown, _req: Request, res: Response, _next: NextFunction) {
   console.error(err);
 
   if (err instanceof AppError) {

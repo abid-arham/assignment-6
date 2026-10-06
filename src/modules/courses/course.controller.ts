@@ -1,11 +1,12 @@
-import { Request, Response } from "express"
+import type { Request, Response } from "express"
 import httpStatus from "http-status"
 import { asyncHandler } from "../../utils/asyncHandler.js"
 import { sendSuccess } from "../../utils/sendResponse.js"
 import { courseServices } from "./course.service.js"
+import type { CourseListQuery } from "./course.validation.js"
 
 const getAllCourses = asyncHandler(async (req: Request, res: Response) => {
-  const { items, meta } = await courseServices.getAllCourses(req.query as any)
+  const { items, meta } = await courseServices.getAllCourses(req.query as unknown as CourseListQuery)
   sendSuccess(res, httpStatus.OK, "Courses retrieved successfully", items, meta)
 })
 

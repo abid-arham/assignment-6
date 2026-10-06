@@ -34,4 +34,7 @@ const listAuditLogs = z.object({
   }),
 })
 
+export type UserListQuery = z.infer<typeof listUsers>["query"]
+export type AuditLogListQuery = z.infer<typeof listAuditLogs>["query"]
+
 export const adminValidation = { listUsers, changeRole, changeStatus, listAuditLogs }

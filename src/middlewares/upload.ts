@@ -6,7 +6,7 @@ import { AppError } from "../utils/AppError.js";
 export const uploadImage = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 2 * 1024 * 1024, files: 1 },
-  fileFilter: (req, file, cb) => {
+  fileFilter: (_req, file, cb) => {
     if (file.mimetype.startsWith("image/")) cb(null, true);
     else cb(new AppError(422, "Only image files are allowed"));
   },

@@ -1,13 +1,8 @@
 import { prisma } from "../../config/prisma.js"
 import { AppError } from "../../utils/AppError.js"
+import type { SectionListQuery } from "./section.validation.js"
 
-interface ListQuery {
-  semesterId?: string
-  courseId?: string
-  instructorId?: string
-}
-
-const getAllSections = async (query: ListQuery) => {
+const getAllSections = async (query: SectionListQuery) => {
   return prisma.section.findMany({
     where: {
       deletedAt: null,

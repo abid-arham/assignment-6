@@ -1,16 +1,9 @@
 import { prisma } from "../../config/prisma.js"
 import { AppError } from "../../utils/AppError.js"
 import { getOrSetCache, invalidateCacheByPrefix } from "../../utils/cache.js"
+import type { CourseListQuery } from "./course.validation.js"
 
-interface ListQuery {
-  page: number
-  limit: number
-  departmentId?: string
-  q?: string
-  sortBy: "title" | "code" | "createdAt"
-}
-
-const getAllCourses = async (query: ListQuery) => {
+const getAllCourses = async (query: CourseListQuery) => {
   const cacheKey = `courses:list:${JSON.stringify(query)}`
   return getOrSetCache(cacheKey, 60, async () => {
     const where = {

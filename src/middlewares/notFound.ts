@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import { sendError } from "../utils/sendResponse.js";
 
 export function notFound(req: Request, res: Response) {

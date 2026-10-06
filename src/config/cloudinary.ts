@@ -1,4 +1,4 @@
-import https from "https"
+import https from "node:https"
 import { v2 as cloudinarySdk } from "cloudinary"
 import config from "./index.js"
 

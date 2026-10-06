@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { type Request, type Response } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import config from "./config/index.js";
@@ -37,12 +37,12 @@ app.use(express.json());
 app.use(rateLimitGlobal);
 
 
-app.get("/", async(req:Request, res:Response)=>{
+app.get("/", async(_req:Request, res:Response)=>{
     
     res.send("Hello World")
 })
 
-app.get("/api/v1/health", (req, res) => {
+app.get("/api/v1/health", (_req, res) => {
   res.json({ success: true, message: "OK", data: { uptime: process.uptime() } });
 });
 

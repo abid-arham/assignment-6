@@ -1,0 +1,22 @@
+{
+	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+	"vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+	// Lint only; formatting is left to the editor.
+	"formatter": { "enabled": false },
+	"assist": { "enabled": false },
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"preset": "recommended",
+			"style": {
+				// req.user! only appears behind authenticate, and GRADE_POINTS[grade]! behind the zod enum.
+				"noNonNullAssertion": "off"
+			},
+			"suspicious": {
+				// src/app.ts needs @ts-ignore (not @ts-expect-error): the helmet error only
+				// exists under Vercel's type-check, so local tsc would flag an unused directive.
+				"noTsIgnore": "off"
+			}
+		}
+	}
+}

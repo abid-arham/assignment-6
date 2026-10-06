@@ -1,16 +1,12 @@
-import { Prisma, Role } from "@prisma/client"
+import { type Prisma, Role } from "@prisma/client"
 import { prisma } from "../../config/prisma.js"
 import { AppError } from "../../utils/AppError.js"
 import { writeAuditLog } from "../../utils/audit.js"
 import { getOrSetCache } from "../../utils/cache.js"
 import { toSafeUser } from "../../utils/serialize.js"
+import type { AuditLogListQuery, UserListQuery } from "./admin.validation.js"
 
-interface Paging {
-  page: number
-  limit: number
-}
-
-const listUsers = async (query: Paging & { role?: Role; q?: string }) => {
+const listUsers = async (query: UserListQuery) => {
   const where: Prisma.UserWhereInput = {
     deletedAt: null,
     ...(query.role && { role: query.role }),
@@ -103,7 +99,7 @@ const getStats = async () =>
     }
   })
 
-const listAuditLogs = async (query: Paging & { entity?: string; action?: string }) => {
+const listAuditLogs = async (query: AuditLogListQuery) => {
   const where: Prisma.AuditLogWhereInput = {
     ...(query.entity && { entity: query.entity }),
     ...(query.action && { action: query.action }),

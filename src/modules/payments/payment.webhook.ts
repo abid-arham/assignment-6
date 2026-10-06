@@ -1,5 +1,5 @@
-import { Request, Response } from "express"
-import Stripe from "stripe"
+import type { Request, Response } from "express"
+import type Stripe from "stripe"
 import { stripe } from "../../config/stripe.js"
 import config from "../../config/index.js"
 import { paymentServices } from "./payment.service.js"
@@ -14,7 +14,7 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
 
   try {
     event = stripe.webhooks.constructEvent(req.body, signature as string, config.stripe_webhook_secret)
-  } catch (err) {
+  } catch {
     return res.status(400).send("Webhook signature verification failed")
   }
 

@@ -25,4 +25,6 @@ const list = z.object({
   }),
 })
 
+export type SectionListQuery = z.infer<typeof list>["query"]
+
 export const sectionValidation = { create, update, list }

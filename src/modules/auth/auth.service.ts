@@ -1,4 +1,4 @@
-import { Role } from "@prisma/client"
+import type { Role } from "@prisma/client"
 import { OAuth2Client } from "google-auth-library"
 import config from "../../config/index.js"
 import { prisma } from "../../config/prisma.js"
@@ -21,7 +21,7 @@ export const registerUser = async (input: { name: string; email: string; passwor
 
 export const loginUser = async (input: { email: string; password: string }) => {
   const user = await prisma.user.findFirst({ where: { email: input.email, deletedAt: null } })
-  if (!user || !user.passwordHash) throw new AppError(401, "Invalid email or password")
+  if (!user?.passwordHash) throw new AppError(401, "Invalid email or password")
 
   const valid = await comparePassword(input.password, user.passwordHash)
   if (!valid) throw new AppError(401, "Invalid email or password")

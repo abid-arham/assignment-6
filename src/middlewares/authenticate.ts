@@ -1,6 +1,6 @@
-import { NextFunction, Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { AppError } from "../utils/AppError.js";
-import { verifyAccessToken, AccessTokenPayload } from "../utils/jwt.js";
+import { verifyAccessToken, type AccessTokenPayload } from "../utils/jwt.js";
 
 declare global {
   namespace Express {
@@ -10,7 +10,7 @@ declare global {
   }
 }
 
-export function authenticate(req: Request, res: Response, next: NextFunction) {
+export function authenticate(req: Request, _res: Response, next: NextFunction) {
   const header = req.headers.authorization;
   if (!header?.startsWith("Bearer ")) {
     return next(new AppError(401, "Missing or invalid Authorization header"));

@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { validate } from "../../middlewares/validate.js";
-import { rateLimitAuth } from "../../middlewares/rateLimit.js";
 import { authValidation } from "./auth.validation.js";
 import { register, login, refresh, logout, googleLogin, googleCallback } from "./auth.controller.js";
 

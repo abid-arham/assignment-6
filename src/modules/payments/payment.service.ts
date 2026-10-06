@@ -1,5 +1,5 @@
-import { randomUUID } from "crypto"
-import Stripe from "stripe"
+import { randomUUID } from "node:crypto"
+import type Stripe from "stripe"
 import { prisma } from "../../config/prisma.js"
 import { stripe } from "../../config/stripe.js"
 import { AppError } from "../../utils/AppError.js"

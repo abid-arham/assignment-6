@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import crypto from "crypto";
+import crypto from "node:crypto";
 
 export function hashPassword(plain: string) {
   return bcrypt.hash(plain, 10);

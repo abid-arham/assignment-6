@@ -1,11 +1,12 @@
-import { Request, Response } from "express"
+import type { Request, Response } from "express"
 import httpStatus from "http-status"
 import { asyncHandler } from "../../utils/asyncHandler.js"
 import { sendSuccess } from "../../utils/sendResponse.js"
 import { sectionServices } from "./section.service.js"
+import type { SectionListQuery } from "./section.validation.js"
 
 const getAllSections = asyncHandler(async (req: Request, res: Response) => {
-  const result = await sectionServices.getAllSections(req.query as any)
+  const result = await sectionServices.getAllSections(req.query as unknown as SectionListQuery)
   sendSuccess(res, httpStatus.OK, "Sections retrieved successfully", result)
 })
 

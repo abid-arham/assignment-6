@@ -4,7 +4,7 @@ import { sendSuccess } from "../../utils/sendResponse.js"
 import { semesterServices } from "./semester.service.js"
 import type { Request, Response } from "express"
 
-const getAllSemesters = asyncHandler(async (req: Request, res: Response) => {
+const getAllSemesters = asyncHandler(async (_req: Request, res: Response) => {
   const result = await semesterServices.getAllSemesters()
   sendSuccess(res, httpStatus.OK, "Semesters retrieved successfully", result)
 })
