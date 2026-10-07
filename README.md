@@ -58,7 +58,7 @@ Every request flows **Routes → Controllers → Services → Prisma**. Controll
   - A cancel expires the Stripe session, then trusts Stripe's state.
   - `checkout.session.expired` marks abandoned payments CANCELLED.
 - **Caching.** The course list (keyed by query string, 60 s, invalidated on writes) and admin stats (60 s) use Redis cache-aside.
-- **Rate limiting.** Upstash sliding window, 60 requests/min per client.
+- **Rate limiting.** Upstash sliding window, 60 requests/min per signed-in user (by access-token user id) or per IP for anonymous requests.
 - **Data hygiene.**
   - Soft deletes via `deletedAt` for departments and courses.
   - Audit log rows for enrollments, drops, grades, role and status changes and payments, written in the same transaction as the change.
