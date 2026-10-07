@@ -78,7 +78,7 @@ All routes are under `/api/v1`. The Postman collection has request bodies, captu
 | Sections | `GET /sections?semesterId&courseId&instructorId` · `GET /:id` · `GET /my` (instructor) · `GET /:id/students` (own sections) · `POST` · `PATCH /:id` (admin) |
 | Enrollments | `POST /enrollments` · `POST /:id/drop` · `GET /my` (student) · `PATCH /:id/grade` (instructor of that section) |
 | Transcript | `GET /students/me/transcript` |
-| Invoices | `POST /invoices/generate` · `GET /invoices/my` |
+| Invoices | `POST /invoices/generate` · `GET /invoices/my` (with each invoice's payment attempts) |
 | Payments | `POST /payments/initiate` · `GET /payments/:id` · `GET /payments/success` · `GET /payments/cancel` (Stripe redirects) · `POST /payments/webhook` (Stripe-signed) |
 | Admin | `GET /admin/users?page&limit&role&q` · `PATCH /admin/users/:id/role` · `PATCH /admin/users/:id/status` · `GET /admin/stats` · `GET /admin/audit-logs?entity&action` |
 
@@ -115,6 +115,7 @@ npm run dev                    # http://localhost:3000/api/v1/health
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | optional | Caching and rate limiting are skipped when unset |
 | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | for avatars | |
 | `CORS_ORIGIN` | optional | Allowed origin (default `*`) |
+| `FRONTEND_URL` | optional | Frontend origin; Stripe Checkout redirects to `<FRONTEND_URL>/payment/success` and `/payment/cancel` instead of this API's JSON endpoints |
 | `PORT`, `NODE_ENV` | optional | Defaults `3000`, `development` |
 
 The server refuses to start if a required variable is missing.

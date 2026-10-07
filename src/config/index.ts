@@ -24,6 +24,7 @@ const envSchema = z.object({
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
   CORS_ORIGIN: z.string().default("*"),
+  FRONTEND_URL: z.url().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -66,4 +67,6 @@ export default {
   cloudinary_api_key: env.CLOUDINARY_API_KEY,
   cloudinary_api_secret: env.CLOUDINARY_API_SECRET,
   cors_origin: env.CORS_ORIGIN,
+  // Stripe redirects here after checkout; without it they land on this API's own JSON endpoints.
+  frontend_url: env.FRONTEND_URL?.replace(/\/+$/, ""),
 };

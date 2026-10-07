@@ -32,7 +32,13 @@ const generateInvoice = async (studentId: string, semesterId: string) => {
 const getMyInvoices = async (studentId: string) => {
   return prisma.invoice.findMany({
     where: { studentId },
-    include: { semester: true },
+    include: {
+      semester: true,
+      payments: {
+        orderBy: { createdAt: "desc" },
+        select: { id: true, status: true, amount: true, currency: true, failureReason: true, createdAt: true },
+      },
+    },
     orderBy: { createdAt: "desc" },
   })
 }

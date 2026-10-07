@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto"
 import type Stripe from "stripe"
+import config from "../../config/index.js"
 import { prisma } from "../../config/prisma.js"
 import { stripe } from "../../config/stripe.js"
 import { AppError } from "../../utils/AppError.js"
@@ -33,8 +34,12 @@ const createCheckoutSession = async (studentId: string, invoiceId: string, baseU
         quantity: 1,
       },
     ],
-    success_url: `${baseUrl}/api/v1/payments/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${baseUrl}/api/v1/payments/cancel?payment_id=${paymentId}`,
+    success_url: config.frontend_url
+      ? `${config.frontend_url}/payment/success?session_id={CHECKOUT_SESSION_ID}`
+      : `${baseUrl}/api/v1/payments/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: config.frontend_url
+      ? `${config.frontend_url}/payment/cancel?payment_id=${paymentId}`
+      : `${baseUrl}/api/v1/payments/cancel?payment_id=${paymentId}`,
     metadata: { invoiceId: invoice.id, studentId, paymentId },
   })
 
