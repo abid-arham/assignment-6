@@ -13,3 +13,4 @@ prisma/**/*.d.ts.map
 ums-tasks (1).md
 .vercel
 .env*
+MANUAL_TEST_CHECKLIST.md
